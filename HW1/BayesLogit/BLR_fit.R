@@ -45,7 +45,7 @@ fileno <- sim_num
 
 #data<-read.table("C:/HaoJi/UC DAVIS PHD in STAT/2013-2014/Fall13/STA250/Homework1/blr_data_1001.csv",
 #	header=TRUE, sep=",")
-data <- read.table(sprintf("~/data/blr_data_%d.csv",
+data <- read.table(sprintf("/home/jihao/STA250/Stuff/HW1/BayesLogit/data/blr_data_%d.csv",
 	fileno), header=TRUE, sep=",")
 head(data)
 para <- read.table("C:/HaoJi/UC DAVIS PHD in STAT/2013-2014/Fall13/STA250/Homework1/blr_pars_1001.csv",header=TRUE)
@@ -178,5 +178,5 @@ for(j in 1:p){
 ### Output the Percentiles of posterior beta to a csv file
 #write.table(BetaPercentile, sprintf("C:/HaoJi/UC DAVIS PHD in STAT/2013-2014/Fall13/STA250/Homework1/blr_res_%d.csv",1+1000),
 #	row.names=FALSE,col.names=FALSE,sep=",")
-write.table(BetaPercentile, sprintf("~/results/blr_res_%d.csv",fileno),
+write.table(BetaPercentile, sprintf("/home/jihao/STA250/Stuff/HW1/BayesLogit/results/blr_res_%d.csv",fileno),
 	row.names=FALSE,col.names=FALSE,sep=",")
