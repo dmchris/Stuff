@@ -70,12 +70,13 @@ logalpha <- function(bt,bstar){
 ### Fit the Logistic Model using the following function
 bayes.logreg <- function(m,y,X,beta.0,Sigma.0.inv,way=1,
 niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
+
 	result.sample <- matrix(nrow=(niter+burnin),ncol=p)
 	betat <- beta.initial
 
 	### METHOD1: MH within GIBBS Sampler:
 	if(way==1){
-		v <- c(0.5,p)
+		v <- rep(0.5,p)
 		count <- rep(0,p)
 		countiter <- rep(0,p)
 		for (i in 1:(burnin+niter)){
