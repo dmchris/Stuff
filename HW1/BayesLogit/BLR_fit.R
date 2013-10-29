@@ -43,8 +43,6 @@ library(MASS)
 ### Take the Command Line Argument integer fileno
 fileno <- sim_num
 
-#data<-read.table(sprintf("C:/HaoJi/UC DAVIS PHD in STAT/2013-2014/Fall13/STA250/Homework1/blr_data_%d.csv",fileno),
-#	header=TRUE, sep=",")
 data <- read.table(file=paste("/home/jihao/STA250/Stuff/HW1/BayesLogit/data/blr_data_",fileno,".csv",sep=""), header=TRUE, sep=",")
 
 ### Data Input and Prior Distn Specification
@@ -57,7 +55,7 @@ Sigma.0.inv <- diag(c(1,1))
 beta.initial <- c(1,1) # initial values of sampling algorithm
 result <- matrix(rep(0,11000*p),nrow=(11000),ncol=p)
 
-### Function for calculating acceptance rate
+### Function for calculating log acceptance rate
 logalpha <- function(bt,bstar){
 	logpistar <- -0.5*t(bstar)%*%Sigma.0.inv%*%bstar+t(beta.0)%*%Sigma.0.inv%*%bstar+
 		t(y)%*%(X%*%bstar)-t(m)%*%log(1+exp(X%*%bstar))
@@ -68,6 +66,8 @@ logalpha <- function(bt,bstar){
 }
 
 ### Fit the Logistic Model using the following function
+### The function contains two methods: way=1:MH within Gibbs, way=2: MH
+### The code for Question 3 is implemented in BLR_fit_Q3.R
 bayes.logreg <- function(m,y,X,beta.0,Sigma.0.inv,way=1,
 niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
 
@@ -82,6 +82,7 @@ niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
 		for (i in 1:(burnin+niter)){
 			beta.star <- rep(0,p)
 			for(j in 1:p){
+				# Sample beta.star from proposal distribution
 				beta.star[j] <- rnorm(1,mean=betat[j],sd=v[j])
 				bnew <- betat
 				bnew[j] <- beta.star[j]
@@ -95,7 +96,8 @@ niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
 				}
 				if(log(U) >= lalpha){result.sample[i,j] <- betat[j]}
 			}	
-		
+			
+			# Retune Process
 			if(i%%retune==0 && i<=burnin){
 				accrate <- count/retune
 				for(jj in 1:p){
@@ -106,6 +108,7 @@ niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
 				cat("Tuning Parameters after", i, "iterations during burnin: ", v, "\n")
 				count <- rep(0,p)
 			}
+			# Output every print.every iterations
 			if(i%%print.every==0){cat(i," iterations of MH in Gibbs have been completed. \n")}
 
 		}#Gibbs For loop Ends
@@ -127,6 +130,7 @@ niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
 		Sigma.p <- diag(rep(1,p))
 		count <- 0; countiter <- 0
 		for (i in 1:(burnin+niter)){
+			# Sample beta.star from proposal distribution
 			beta.star <- rep(0,p)
 			beta.star <- mvrnorm(n=1,mu=betat,Sigma=delta*Sigma.p)
 			bnew <- beta.star
@@ -140,6 +144,7 @@ niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
 			}
 			if(log(U) >= lalpha){result.sample[i,] <- betat}
 			
+			# Retune Process
 			if(i%%retune==0 && i<=burnin){
 				accrate <- count/retune
 				if(accrate<0.3) delta <- delta/sqrt(5)
@@ -148,6 +153,7 @@ niter=10000,burnin=1000, print.every=1000,retune=100,verbose=TRUE){
 				cat("Tuning Parameters after", i, "iterations during burnin: ", delta, "\n")
 				count <- 0
 			}
+			# Print Every print.every iterations
 			if(i%%print.every==0){cat(i," iterations of MH in Gibbs have been completed. \n")}
 		}#Gibbs For loop Ends
 		cat("Acceptance Rate after Burnin is ", countiter/niter, "\n") ### FOR METHOD2
